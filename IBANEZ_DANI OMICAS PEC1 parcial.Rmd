@@ -120,6 +120,8 @@ knitr::kable(targets18, booktabs = TRUE, caption = 'Subset de muestras seleccion
 
 ```
 
+
+
 ### Carga de paquetes Bioconductor
 
 
@@ -127,7 +129,7 @@ knitr::kable(targets18, booktabs = TRUE, caption = 'Subset de muestras seleccion
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
      install.packages("BiocManager")
-BiocManager::install()
+# BiocManager::install()
 
 if(!(require(knitr))) install.packages("knitr")
 if(!(require(colorspace))) install.packages("colorspace")
@@ -142,13 +144,15 @@ if(!(require(BiocManager))) install.packages("BiocManager")
 # install.packages("Rtools")
 # BiocManager::install("oligo")
 # BiocManager::install("pd.mogene.2.1.st")
-BiocManager::install("arrayQualityMetrics")
+# BiocManager::install("arrayQualityMetrics")
 # BiocManager::install("pvca")
 
-# NOT NEEDED UNTIL ANALYSES ARE PERFORMED
-BiocManager::install("limma")
-BiocManager::install("genefilter")
-BiocManager::install("mogene21sttranscriptcluster.db")
+
+# PAQUETES NECESARIOS PARA EL ANALISIS
+
+# BiocManager::install("limma")
+# BiocManager::install("genefilter")
+# BiocManager::install("mogene21sttranscriptcluster.db")
 # BiocManager::install("annotate")
 # BiocManager::install("org.Mm.eg.db")
 # BiocManager::install("ReactomePA")
@@ -164,128 +168,28 @@ BiocManager::install("mogene21sttranscriptcluster.db")
 
 library(oligo)
 celFiles <- list.celfiles("./data", full.names = TRUE)
-head(celFiles)
+celFiles
 library(Biobase)
 my.targets <-read.AnnotatedDataFrame(file.path("./data","targets18.csv"), header = TRUE, row.names = 1, sep=";") 
 my.targets
+row.names(my.targets)
 rawData <- read.celfiles(celFiles, phenoData = my.targets)
 class(rawData)
+
+my.targets@data
+my.targets@data$ShortName
+rownames(pData(rawData))
+colnames(rawData)
+knitr::kable(pData(rawData), booktabs = TRUE, caption = 'Subset de muestras seleccionadas para la PEC1 para IDP:1083627')
+pData(rawData)
 
 my.targets@data$ShortName->rownames(pData(rawData))
 colnames(rawData) <-rownames(pData(rawData)) 
 head(pData(rawData))
-head(rawData)
+rawData
 colnames(rawData)
-head(exprs)
-colnames(exprs)
+head(exprs(rawData))
+tail(exprs(rawData),20)
+
+colnames(exprs(rawData))
 ```
-
-
-```{r control de calidad}
-
-library(arrayQualityMetrics)
-arrayQualityMetrics(rawData)
-``` 
-
-
-```{r funcion plotCA3}
-
-library(ggplot2)
-library(ggrepel)
-plotPCA3 <- function (datos, labels, factor, title, scale,colores, size = 1.5, glineas = 0.25) {
-   data <- prcomp(t(datos),scale=scale)
-   # plot adjustments
-   dataDf <- data.frame(data$x)
-   Group <- factor
-   loads <- round(data$sdev^2/sum(data$sdev^2)*100,1)
-   # main plot
-   p1 <- ggplot(dataDf,aes(x=PC1, y=PC2)) +
-     theme_classic() +
-     geom_hline(yintercept = 0, color = "gray70") +
-     geom_vline(xintercept = 0, color = "gray70") +
-     geom_point(aes(color = Group), alpha = 0.55, size = 3) +
-     coord_cartesian(xlim = c(min(data$x[,1])-5,max(data$x[,1])+5)) +
-     scale_fill_discrete(name = "Group")
-   # avoiding labels superposition
-#   p1 + geom_text_repel(aes(y = PC2 + 0.25, label = labels),segment.size = 0.25, size = size) + 
-#     labs(x = c(paste("PC1",loads[1],"%")),y=c(paste("PC2",loads[2],"%"))) +  
-#     ggtitle(paste("Principal Component Analysis for: ",title,sep=" "))+ 
-#     theme(plot.title = element_text(hjust = 0.5)) +
-#     scale_color_manual(values=colores)
-   }
-```
-
-```{r graficando posibles singularidades o errores}
-
-plotraw <- plotPCA3(exprs(rawData), labels = myTargets, factor = myTargets$Group, title="Raw data", scale = FALSE, size = 3,  colores = c("red", "blue", "green", "yellow"))
-plotraw
-``` 
-
-```{r graficando posibles singularidades o errores boxplot}
-
-boxraw <- boxplot(rawData, cex.axis=0.5, las=2,  which="all", 
-          col = c(rep("red", 3), rep("blue", 3), rep("green", 3), rep("yellow", 3)),
-          main="Distribution of raw intensity values")
-boxraw
-```
-```{r normalització}
-
-eset_rma <- rma(rawData)
-arrayQualityMetrics(eset_rma)
-boxplot(eset_rma, cex.axis=0.5, las=2,  which="all", 
-          col = c(rep("red", 3), rep("blue", 3), rep("green", 3), rep("yellow", 3)),
-          main="Boxplot for arrays intensity: Normalized Data")
-```
-```{r batch effect}
-
-targets18 <-read.csv(file="./data/targets18.csv", row.names = 1, head=TRUE)
-
-library(pvca)
-pData(eset_rma) <- targets18
-#select the threshold
-pct_threshold <- 0.6
-#select the factors to analyze
-batch.factors <- c("Genotype", "Temperature")
-#run the analysis
-pvcaObj <- pvcaBatchAssess (eset_rma, batch.factors, pct_threshold)
-
-#plot the results
-bp <- barplot(pvcaObj$dat, xlab = "Effects",
-   ylab = "Weighted average proportion variance",
-   ylim= c(0,1.1),col = c("mediumorchid"), las=2,
-   main="PVCA estimation")
-axis(1, at = bp, labels = pvcaObj$label, cex.axis = 0.75, las=2)
-values = pvcaObj$dat
-new_values = round(values , 3)
-text(bp,pvcaObj$dat,labels = new_values, pos=3, cex = 0.7)
-```
-
-```{r detecting genes}
-
-sds <- apply (exprs(eset_rma), 1, sd)
-sdsO<- sort(sds)
-plot(1:length(sdsO), sdsO, main="Distribution of variability for all genes",
-      sub="Vertical lines represent 90% and 95% percentiles",
-      xlab="Gene index (from least to most variable)", ylab="Standard deviation")
-abline(v=length(sds)*c(0.9,0.95))
-```
-
-
-```{r filtering least variable genes}
-library(genefilter)
-library(mogene21sttranscriptcluster.db)
-annotation(eset_rma) <- "mogene21sttranscriptcluster.db"
-filtered <- nsFilter(eset_rma, 
-                      require.entrez = TRUE, remove.dupEntrez = TRUE,
-                      var.filter=TRUE, var.func=IQR, var.cutoff=0.75, 
-                      filterByQuantile=TRUE, feature.exclude = "^AFFX")
-#Function nsFilter returns the filtered values and a report of the filtering results.
-
-print(filtered$filter.log)
-
-eset_filtered <-filtered$eset
-```
-
-
-
-
