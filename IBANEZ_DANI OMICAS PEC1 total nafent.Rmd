@@ -1,18 +1,27 @@
 ---
-title: "PEC1 GSE46687"
-author: "Dani Ibañez"
-date: "9/4/2021"
-output: html_document
+#title: "PEC1 GSE46687"
+#author: "Dani Ibañez"
+#date: "9/4/2021"
+#output: html_document
 ---
 
+![](./images/header_adn.jpg)
+<br>
 
-```{r setup, include=FALSE, echo=FALSE, fig.width = 10, fig.height = 10, out.width = "400px", out.height="300px",fig.align='center'}
+
+```{r setup, include=FALSE, echo=FALSE, fig.width = 10, fig.height = 10, out.width = "400px", out.height="300px"}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, eval = TRUE, warning = FALSE, comment=NA)
 
 ```
+#### **Máster de Bioinformática y Bioestadística**
+##### Análisis de datos ómicos: PEC 1
+##### Dani Ibáñez 26-4-2021
+<br>
 <br>
 
-### DESCRIPCIÓN DEL ESTUDIO: Síndrome de Turner
+<center>
+### **DESCRIPCIÓN DEL ESTUDIO: Síndrome de Turner**
+</center>
 
 <br>
 
@@ -25,6 +34,12 @@ Aunque se describió esta patología en 1938, fue en 1959 cuando un grupo de cie
 Parece demostrado que no es hereditario, pero a su vez se considera que la mayoría de incidencia es causada por el cromosoma X aportado por el padre, por lo que se considera que son patologías generadas o en el proceso de meiosis de los padres o en las primeras fases de multiplicación embrionaria. Esta segunda opción podría explicar por qué algunas mujeres presentan células con los dos cromosomas XX y otras células sin uno de ellos.
 
 No hay un tratamiento específico definido si bien, el principal problema que es la baja estatura responde a tratamientos de estimulación de hormona del crecimiento.
+
+<br>
+
+![](./images/Cariotipo_turner.jpg)
+
+**Fuente: Página web healthjade.com**
 
 <br>
 
@@ -135,7 +150,9 @@ if (!dir.exists("results")) {dir.create("results")}
 Tal como he informado antes, para este estudio se nos indica trabajar con un subset de las 36 muestras originales. En concreto nos piden aplicar la función del enunciado usando nuestro número IDP.
 
 
-En mi caso: **IDP: 1083627**
+En mi caso, con **IDP: 1083627**, las muestras seleccionadas son las siguientes:  
+  
+  
 
 ```{r selección subset mediante idp}
 
@@ -146,17 +163,21 @@ selectSamples<- function (myID){
  }
  
 samples_idp = selectSamples(1083627)
-cat("las muestras seleccionadas son las números",samples_idp)
+samples_idp
 ```
 
 <br>
   
 A partir de aquí establecemos nuestro set de muestras personalizado con las 18 columnas concretas obtenidas.
-He cambiado el nombre de la columna de muestra "sample_id" y la del grupo es "karyotype"
+He cambiado el nombre de la columna de muestra **"sample_id"** y la del grupo es **"karyotype"**
 
 Comprobamos cuales son y presentamos la tabla de los valores Phenodata:
   
 <br>
+
+##### **Subset de muestras seleccionadas para la PEC1 para IDP:1083627**  
+  
+  
 
 ```{r subset 18 muestras targets}
 
@@ -171,14 +192,14 @@ colnames(targets18)[1]<-"sample_id"
 #rownames(targets18)
 muestras <- targets18$sample_id
 
-knitr::kable(targets18, booktabs = TRUE, caption = 'Subset de muestras seleccionadas para la PEC1 para IDP:1083627')
+knitr::kable(targets18, booktabs = TRUE)
 
 ```
 
 
 <br>
 
-### CARGA DE DATOS DEL ESTUDIO
+### **CARGA DE DATOS DEL ESTUDIO**
   
 <br>
 
@@ -234,15 +255,15 @@ colnames(rawData) <-rownames(pData(rawData))
 cat("Comprobamos las dimensiones de los datos en rawData")
 dim(exprs(rawData))
 cat("Comprobamos las primeras filas del rawData")
-head(exprs(rawData),10)
+head(exprs(rawData)[,1:6],10) # primeras filas de las 8 primeras columnas
 cat("Comprobamos las últimas filas del rawData")
-tail(exprs(rawData),10)
+tail(exprs(rawData)[,13:18],10) # últimas filas de las 8 columnas restantes
 
 ```
 
 <br>
 
-#### ** Observaciones sobre los datos**
+#### **Observaciones sobre los datos**
 
 Como observaciones a los datos del rawData comentamos los siguientes puntos:
 
@@ -250,11 +271,11 @@ Como observaciones a los datos del rawData comentamos los siguientes puntos:
 - Nos hemos fijado en que la serie muestra un dato alto y otro bajo de forma sucesiva. Creemos que eso se debe a la **técnica del mismatch**, es decir, la técnica que ofrece en la lectura, una sonda que encaja con el tránscrito y otra donde se ha modificado el nucleótido central. Por lo tanto es lógico que en la primera encaje y en la segunda debe no encajar.
 - Hemos modificado los nombres de las columnas ya que nos añade una x. un poco engorrosa.
 
-Una vez observados los datos en bruto, pasamos a plantear el estuido y a realizarlo.
+Una vez observados los datos en bruto, pasamos a plantear el estudio y a realizarlo.
 
 <br>
 
-### PLANTEAMIENTO INICIAL DEL ESTUDIO Y PRIMERAS REFLEXIONES
+### **PLANTEAMIENTO INICIAL DEL ESTUDIO Y PRIMERAS REFLEXIONES**
   
 <br>
 
@@ -264,18 +285,18 @@ El archivo **targetsAll** que se nos ha proporcionado es muy escueto y no sé se
 
 library(GEOquery)
 
-Turner <- getGEO("GSE46687",GSEMatrix=TRUE)
+-Turner <- getGEO("GSE46687",GSEMatrix=TRUE)
 
-str(pData)
+-str(pData)
 
-head(pData)
+-head(pData)
 
-NOTA: Se adjunta todo el código R utilizado.
+-NOTA: Se adjunta todo el código R utilizado.
 
 
-He indicado las lineas justas para comprobar que el repositorio GSE46687 no aporta información adicional. Podría parecer que **Gender** sería un dato importante pero son todo mujeres como ya hemos dicho al inicio del estudio. Todo el resto de campos son idénticos.
+He indicado las lineas justas para comprobar que el repositorio GSE46687 **no aporta información adicional**. Podría parecer que **Gender** sería un dato importante pero son todo mujeres como ya hemos dicho al inicio del estudio. Todo el resto de campos son idénticos. las fechas de las muestras son todas las mismas.
 
-Por lo tanto el estudio se debe basar solo en las diferencias en los cromosomas, definido en el archivo tragetsAll como campo **karyotype**
+Por lo tanto el estudio se debe basar solo en las diferencias en los cromosomas, definido en el archivo targetsAll como campo **karyotype**
   
 <br>
 
@@ -299,7 +320,7 @@ También quiero comentar que a partir de aquí me han surgido un montón de preg
 
 <br>
 
-### ""CONTROL DE CALIDAD DE LOS DATOS EN BRUTO""
+### **CONTROL DE CALIDAD DE LOS DATOS EN BRUTO**
   
 <br>
 
@@ -313,9 +334,9 @@ También quiero comentar que a partir de aquí me han surgido un montón de preg
 #arrayQualityMetrics(rawData, force=TRUE) # forzamos a que cree de nuevo el directorio con los datos.
 ``` 
 
-he puesto el titular entrecomillado porque según como podriamos decir que es un oximoron. Si los datos no han estado normalizados y tratados, el análisis de calidad no sivre de nada. Nos sirve de ejercicio y de comprara con el mismo estudio una vez los datos están normalizados.
+El titular se podría considerar un oximoron. Analizar la calidad de unos datos que no están revisados ni normalizados no tiene gran utilidad, a menos que nos sirva para ver el efecto de las funciones entre el antes y el después.
 
-Esta función **arrayQualityMetrics** nos crea un directorio con todos los datos del análisis que se pueden leer lanzando el archivo index.html del directorio.
+Esta función **arrayQualityMetrics** nos crea un directorio con todos los datos del análisis que se pueden leer lanzando el archivo **index.html** del directorio.
 
 El resultado nos indica en la primera tabla que mediante los tres métodos se detectan ouliers. No obstante el método MA plots detecta como oultiers muchas muestras por lo que no tiene mucho sentido. En cambio el método de distances between arrays solo detecta la muestra **XpRep4**. En cuanto al método boxplots, no se detectan outliers.
 
@@ -355,13 +376,37 @@ colnames(eset_rma) <-rownames(pData(eset_rma))
 cat("Comprobamos las dimensiones de los datos en eset_rma")
 dim(exprs(eset_rma))
 cat("Comprobamos las primeras filas del eset_rma")
-head(exprs(eset_rma),10)
-cat("Comprobamos las últimas filas del eset_rma")
-tail(exprs(eset_rma),10)
+head(exprs(eset_rma)[,1:6],10) # primeras filas de las 6 primeras columnas
+cat("Comprobamos las últimas filas del eset_tma")
+tail(exprs(eset_rma)[,14:18],10) # últimas filas de las 5 columnas restantes
 
+summary(exprs(eset_rma))
 ```
 
 
+<br>
+
+#### **Comprobación del proceso de normalización con Boxplot**
+
+Una buena manera de comprobar el trabajo de la función rma() es comprobar el efecto que se produce en los datos de las muestras mediante boxplot, antes y despues de la normalización.
+
+Vamos a comparar los dos gráficos aunque la verdad, creo que estamos comparando peras con manzanas, de más de 1 millón de registros con datos de todo tipo (por ejemplo incluye los mismatch), a los 50 y pico mil que básicamente son datos ya reales de expresión génica. Como estamos en una PEC, vamos a realizar el ejercicio comparativo.
+
+Para ello vamos a realizar un boxplot sobre el expressionSet **rawData** y posteriormente sobre **eset_rma**
+  
+
+```{r graficando el efecto de la función rma() sobre los datos mediante boxplot()}
+
+boxplot(rawData, cex.axis=0.5, las=2,  
+          col = c(rep("coral2", 6), rep("aquamarine3", 6), rep("darkkhaki", 6)),
+          main="Boxplot de valores en bruto")
+
+
+boxplot(eset_rma, cex.axis=0.5, las=2,  
+          col = c(rep("coral2", 6), rep("aquamarine3", 6), rep("darkkhaki", 6)),
+          main="Boxplot de valores normalizados")
+
+```
 
   
 <br>
@@ -382,13 +427,27 @@ library(arrayQualityMetrics)
 En esta ocasión podemos hacer más caso a la función ArrayQualityMetrics pero por ejemplo vemos que de los tres métodos de control solo el análisis de DistanceBetweenArrays nos da un **posible oulier** en la muestra etiquetada como **Xm_rep1**, la muestra con síndrome de Turner con cromosoma de origen materno 45Xm. 
 
 Adjuntamos la tabla:
-imagen: ![](./data/Tabla_Quality_PEC1.JPG)
+!["Tabla obtenida con la función ArrayQualityMetrics"](./images/Tabla_Quality_PEC1.JPG)
 
 Vamos a seguir el estudio con otros gráficos a ver si obtenemos más claridad en lo que tenemos entre manos.
 
 
   
 <br>
+
+
+
+
+#### **Estudio de un posible efecto batch**
+
+La verdad es que en este ejemplo el efecto batch tiene poco sentido, pienso. Por un lado he podido comprobar que todas las muestras se han tratado al mismo tiempo ya que así se indica en el archivo pData del expresiónSet obtenido mediante getGEO(GSE46687).
+
+Por otra parte el grupo depende del Cariotipo que es un dato que no tiene posible error, no es numérico. O tienes 2 cromosomas XX o no los tienes. No hay temperaturas, no hay tratamientos.
+
+por lo tanto **no le veo el sentido a realizar un estudio de efecto batch**
+
+<br>
+
 
 #### **Control de calidad mediante gráficos de componentes PCA()**
 
@@ -411,56 +470,301 @@ plotPCA3 <- function (datos, labels, factor, title, scale,colores, size = 1.5, g
      geom_vline(xintercept = 0, color = "gray70") +
      geom_point(aes(color = Group), alpha = 0.55, size = 3) +
      coord_cartesian(xlim = c(min(data$x[,1])-5,max(data$x[,1])+5)) +
-     scale_fill_discrete(name = "Group")
+     scale_fill_discrete(name = "karyotype")
    # avoiding labels superposition
    p1 + geom_text_repel(aes(y = PC2 + 0.25, label = labels),segment.size = 0.25, size = size) + 
      labs(x = c(paste("PC1",loads[1],"%")),y=c(paste("PC2",loads[2],"%"))) +  
-     ggtitle(paste("Principal Component Analysis for: ",title,sep=" "))+ 
+     ggtitle(paste("Analisis PCA: ",title,sep=" "))+ 
      theme(plot.title = element_text(hjust = 0.5)) +
      scale_color_manual(values=colores)
    }
 ```
 
-#```{r graficando posibles singularidades o errores mediante PCA}
+```{r grafico de componentes PCA sobre las 18 muestras}
 
 plotPCA3(exprs(eset_rma), labels = targets18$sample_id, factor = targets18$karyotype, 
-        title="Normalized data", scale = FALSE, size = 4, 
-        colores = c("coral2","aquamarine3","darkkhaki"))
+        title="Datos normalizados de las 18 muestras", scale = FALSE, size = 4, 
+        colores = c("coral2","aquamarine3","darkorchid2"))
+```
+
+Si nos fijamos en el cuadro de componentes, vemos que, en esencia, todas las muestras con doble cromosoma XX aparecen en la parte superior del cuadro (variación según el componente PC2) mientras que las muestras con un solo cromosoma están en la parte inferior del cuadro. Enn cambio, **la muestra detectada como outlier Xm_rep1 aparece arriba de todo en lo que parece una anomalía**.
+
+Así que me dispongo a realizar un **estudio provisional sin la muestra Xmrep1** y comprobar el mismo gráfico PCA a ver si se notan los cambios.
+
+
+```{r grafico de componentes PCA sobre las 17 muestras}
+
+targets17 <- targets18[-7,]
+exprs_m17 <- exprs(eset_rma)[,-7]
+
+
+plotPCA3(exprs_m17, labels = targets17$sample_id, factor = targets17$karyotype, 
+        title="Datos normalizados 17 muestras sin posible outlier", scale = FALSE, size = 4, 
+        colores = c("coral2","aquamarine3","darkorchid2"))
+```
+
+
+
+#```{r graficos y control calidad (Hierarchical)}
+
+clust.euclid.average <- hclust(dist(t(exprs(eset_rma))),method="average")
+plot(clust.euclid.average, labels=colnames(exprs(eset_rma)), main="Hierarchical clustering of samples",  hang=-1, cex=0.7)
+
 #```
 
-Si nos fijamos en el cuadro de componentes, vemos que, en esencia, todas las muestras con doble cromosoma XX aparecen en la parte superior del cuadro (variación según el componente PC2) mientras que las muestras con un solo cromosoma están en la parte inferior del cuadro. en cambio, la muestra detectada como outlier **Xm_rep1** aparece arriba de todo en lo que parece una clara anomalía.
-
-Así que me dispingo a realizar un **estudio provisional sin la muestra Xmrep1** y comprobar el mismo gráfico PCA a ver si se notan los cambios.
 
 
-```{r graficando posibles singularidades o errores mediante PCA}
 
-#eset_m17 <- eset_rma
-targets17 <- targets18[-7,]
-#my.targets <- my.targets[-7,]
-#pData(eset_m17) <- pData(eset_rma)[-7,]
-eset_m17 <- exprs(eset_rma)[,-7]
+<br>
+
+### **PROCESO DE ANALISIS CON DATOS REVISADOS**
+  
+<br>
+
+#### **Inicio del estudio con subset de 17 muestras**
+
+Aunque es una decisión que puede tener consecuencias en las conclusiones, decido eliminar la muestra identificada como outlier en ArrayQualityMetrics y corroborada en el gráfico pca. 
+
+A partir de aquí voy a montar el expressionset de 17 muestras y a realizar el estudio de expresión génica.
+
+- targets17 <- pData(eset_rma)[-7,]
+- exprs_m17 <- exprs(eset_rma)[,-7]
+- FenoData <- new("AnnotatedDataFrame", data=targets17)
+- eset_m17 <- ExpressionSet(assayData = exprs_m17, phenoData=FenoData)
+
+A partir de ahora mis datos están en el expressionSet **eset_m17** 
+Hacemos una previsualización para comprobar que lo hemos realizado correctamente:  
 
 
-plotPCA3(eset_m17, labels = targets17$sample_id, factor = targets17$karyotype, 
-        title="Normalized data", scale = FALSE, size = 4, 
-        colores = c("coral2","aquamarine3","darkkhaki"))
+<br>
+  
+
+```{r creando expressionset de 17 muestras}
+
+targets17 <- pData(eset_rma)[-7,]
+exprs_m17 <- exprs(eset_rma)[,-7]
+FenoData <- new("AnnotatedDataFrame", data=targets17)
+eset_m17 <- ExpressionSet(assayData = exprs_m17, phenoData=FenoData)
+knitr::kable(pData(eset_m17), booktabs = TRUE, caption = 'PhenoData del subset de las 17 muestras')
+head(exprs(eset_m17)[,1:5],10) #visualizamos los primeros 10 registros de las primeras 4 muestras
 ```
 
-```{r graficando posibles singularidades o errores mediante PCA 16}
+  
+<br>
 
-#eset_m17 <- eset_rma
-targets16 <- targets17[-6,]
-#my.targets <- my.targets[-7,]
-#pData(eset_m17) <- pData(eset_rma)[-7,]
-eset_m16 <- eset_m17[,-6]
+#### **Visualización de porcentaje de genes expresados**
 
 
-plotPCA3(eset_m16, labels = targets16$sample_id, factor = targets16$karyotype, 
-        title="Normalized data", scale = FALSE, size = 4, 
-        colores = c("coral2","aquamarine3","darkkhaki"))
+Podemos observar qué porcentage de genes se expresan por encima del umbral del 95% y 99%. La inmensa mayoría de los genes claramente expresados representan menos del 1% del total.
+
+```{r visualización de los genes que más variabilidad presentan}
+
+sds <- apply (exprs(eset_m17), 1, sd)
+sdsO<- sort(sds)
+plot(1:length(sdsO), sdsO, main="Distribución variabilidad de genes",
+      sub="Las líneas verticales representan el 95% y el 99% del total de genes",
+      xlab="distribución de expresión génica de menos a más variabilidad", ylab="desviación estandar",col="chartreuse2")
+abline(v=length(sds)*c(0.95,0.99),col="darkred",lwd = 1,lty = 2)
+
+```
+
+  
+<br>
+
+#### **Filtrado de los probes sin valores representativos de expresión**  
+
+<br>
+  
+  
+
+```{r filtrado de genes más significativos en su expresión}
+#BiocManager::install("hgu133plus2.db")
+library(genefilter)
+library("hgu133plus2.db")
+annotation(eset_m17) <- "hgu133plus2.db"
+
+
+list_filtered <- nsFilter(eset_m17, require.entrez = TRUE, remove.dupEntrez = TRUE, var.filter=TRUE, var.func=IQR, var.cutoff=0.75,filterByQuantile=TRUE, feature.exclude = "^AFFX")
+eset_filtered <- list_filtered$eset
+print(list_filtered$filter.log)
+dim(exprs(eset_filtered))
+
+cat("Si aplicamos un filtro del 75% de genes, nos quedan ",dim(exprs(eset_filtered))[1]," probesets")
+
+
+list_filtered <- nsFilter(eset_m17, require.entrez = TRUE, remove.dupEntrez = TRUE, var.filter=TRUE, var.func=IQR, var.cutoff=0.99,filterByQuantile=TRUE, feature.exclude = "^AFFX")
+eset_filtered <- list_filtered$eset
+print(list_filtered$filter.log)
+dim(exprs(eset_filtered))
+
+cat("Si aplicamos un filtro del 99% de genes, nos quedan ",dim(exprs(eset_filtered))[1]," probesets")
+
+list_filtered <- nsFilter(eset_m17, require.entrez = TRUE, remove.dupEntrez = TRUE, var.filter=TRUE, var.func=IQR, var.cutoff=0.95,filterByQuantile=TRUE, feature.exclude = "^AFFX")
+eset_filtered <- list_filtered$eset
+print(list_filtered$filter.log)
+dim(exprs(eset_filtered))
+
+cat("Si aplicamos un filtro del 95% de genes, nos quedan ",dim(exprs(eset_filtered))[1]," probesets")
+
+
+```
+
+En nuestro caso nos quedaremos con un subset de probes correspondiente al **5%** de "genes" expresados. Pongo "genes" entrecomillados porque he estado usando este termino con abuso de lenguaje, ya que son tránscritos de RNAm que combinan distintos exones del mismo gen. Por lo tanto hemos eliminado provisionalmente el 95% de los probesets aparentemente sin valor en el estudio.
+
+
+
+
+#### **Guardado de archivos en disco**
+
+<br>
+
+En esta ocasión vamos a guardar en disco tanto los archivos relacionados con el **eset_rma** como con el **eset_m17**  
+
+
+
+
+```{r guardar los archvivos filtrados para el analisis}
+
+write.csv(exprs(eset_filtered), file="./results/normalized.Filtered.Data.csv")
+
+write.csv(exprs(eset_rma), file="./results/normalized.Data.csv")
+write.csv(exprs(eset_m17), file="./results/normalized17.Data.csv")
+
+save(eset_rma, eset_filtered, file="./results/normalized.Data.Rda")
+save(eset_m17, eset_filtered, file="./results/normalized17.Data.Rda")
 ```
 
 
 
 
+  
+<br>
+
+#### **Matriz de contrastes**  
+  
+En este apartado vamos a construir la matriz de contrastes. En nuestro caso queremos realizar tres comparaciones:
+
+- grupo Xp respecto grupo Xm
+- grupo Xp respecto grupo XX
+- grupo Xm respecto grupo XX
+
+<br>
+
+
+```{r contruyendo la matriz de contrastes}
+
+if (!exists("eset_filtered")) load (file="./results/normalized17.Data.Rda")
+library(limma)
+designMat<- model.matrix(~0+karyotype, pData(eset_filtered))
+colnames(designMat) <- c("XX", "Xp", "Xm")
+print(designMat)
+
+cont.matrix <- makeContrasts(Xp_vs_Xm = Xp-Xm, Xp_vs_XX = Xp-XX, Xm_vs_XX = Xm-XX,levels=designMat)
+print(cont.matrix)
+```
+
+
+```{r fit}
+library(limma)
+fit<-lmFit(eset_filtered, designMat)
+fit.main<-contrasts.fit(fit, cont.matrix)
+fit.main<-eBayes(fit.main)
+class(fit.main)
+colnames(fit.main)
+```
+
+
+```{r volcano grafic}
+
+library(hgu133plus2.db)
+geneSymbols <- select(hgu133plus2.db, rownames(fit.main), c("SYMBOL"))
+SYMBOLS<- geneSymbols$SYMBOL
+volcanoplot(fit.main, coef=1, highlight=4, names=rownames(fit.main), 
+             main=paste("Differentially expressed genes", colnames(cont.matrix)[1], sep="\n"))
+abline(v=c(-1,1))
+```
+
+
+
+```{r creando expressionset eliminando 224588_a}
+
+genes <- rownames(exprs(eset_filtered))
+pos <- grep('224588',genes)
+pos
+genes[pos]
+exprs_f17 <- exprs(eset_filtered)[-pos,]
+FenoData <- new("AnnotatedDataFrame", data=targets17)
+eset_filtered17 <- ExpressionSet(assayData = exprs_f17, phenoData=FenoData)
+dim(exprs(eset_filtered17))
+```
+
+
+
+```{r fit 2}
+library(limma)
+fit<-lmFit(eset_filtered17, designMat)
+fit.main<-contrasts.fit(fit, cont.matrix)
+fit.main<-eBayes(fit.main)
+class(fit.main)
+colnames(fit.main)
+```
+
+
+```{r volcano grafic 2}
+
+library(hgu133plus2.db)
+geneSymbols <- select(hgu133plus2.db, rownames(fit.main), c("SYMBOL"))
+SYMBOLS<- geneSymbols$SYMBOL
+volcanoplot(fit.main, coef=1, highlight=4, names=rownames(fit.main), 
+             main=paste("Differentially expressed genes", colnames(cont.matrix)[1], sep="\n"))
+abline(v=c(-1,1))
+```
+
+
+
+
+```{r res}
+res<-decideTests(fit.main, method="separate", adjust.method="fdr", p.value=0.1, lfc=1)
+
+sum.res.rows<-apply(abs(res),1,sum)
+res.selected<-res[sum.res.rows!=0,] 
+print(summary(res))
+
+vennDiagram (res.selected[,1:3], cex=0.9)
+title("Genes in common between the three comparisons\n Genes selected with FDR < 0.1 and logFC > 1")
+
+```
+
+
+```{r heatmap}
+
+probesInHeatmap <- rownames(res.selected)
+HMdata <- exprs(eset_filtered17)[rownames(exprs(eset_filtered17)) %in% probesInHeatmap,]
+ 
+geneSymbols <- select(hgu133plus2.db, rownames(HMdata), c("SYMBOL"))
+SYMBOLS<- geneSymbols$SYMBOL
+rownames(HMdata) <- SYMBOLS
+write.csv(HMdata, file = file.path("./results/data4Heatmap.csv"))
+
+my_palette <- colorRampPalette(c("burlywood3", "red"))(n = 299)
+
+library(gplots)
+ 
+heatmap.2(HMdata,
+           Rowv = FALSE,
+           Colv = FALSE,
+           main = "Differentially expressed genes \n FDR < 0,1, logFC >=1",
+           scale = "row",
+           col = my_palette,
+           sepcolor = "cornsilk2",
+           sepwidth = c(0.05,0.05),
+           cexRow = 0.5,
+           cexCol = 0.9,
+           key = TRUE,
+           keysize = 1.5,
+           density.info = "histogram",
+           ColSideColors = c(rep("coral2", 6), rep("aquamarine3", 5), rep("darkkhaki", 6)),
+           tracecol = NULL,
+           dendrogram = "none",
+           srtCol = 30)
+```

@@ -381,6 +381,7 @@ write.csv(exprs(eset_filtered), file="./results/normalized.Filtered.Data.csv")
 save(eset_rma, eset_filtered, file="./results/normalized.Data.Rda")
 ```
 
+
 ```{r contruyendo la matriz de contrastes}
 
 if (!exists("eset_filtered")) load (file="./results/normalized.Data.Rda")
