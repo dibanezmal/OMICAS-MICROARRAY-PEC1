@@ -4,7 +4,7 @@
 //   template for this script from arrayQualityMetrics/inst/scripts into the report.
 
 var highlightInitial = [ true, false, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true ];
-var arrayMetadata    = [ [ "1" ], [ "2" ], [ "3" ], [ "4" ], [ "5" ], [ "6" ], [ "7" ], [ "8" ], [ "9" ], [ "10" ], [ "11" ], [ "12" ], [ "13" ], [ "14" ], [ "15" ], [ "16" ], [ "17" ], [ "18" ] ];
+var arrayMetadata    = [ [ "1", "XX_rep1", ""XX_rep1"", ""46XX"" ], [ "2", "XX_rep2", ""XX_rep2"", ""46XX"" ], [ "3", "XX_rep3", ""XX_rep3"", ""46XX"" ], [ "4", "XX_rep8", ""XX_rep8"", ""46XX"" ], [ "5", "XX_rep9", ""XX_rep9"", ""46XX"" ], [ "6", "XX_rep10", ""XX_rep10"", ""46XX"" ], [ "7", "Xm_rep1", ""Xm_rep1"", ""45Xm"" ], [ "8", "Xm_rep3", ""Xm_rep3"", ""45Xm"" ], [ "9", "Xm_rep7", ""Xm_rep7"", ""45Xm"" ], [ "10", "Xm_rep8", ""Xm_rep8"", ""45Xm"" ], [ "11", "Xm_rep13", ""Xm_rep13"", ""45Xm"" ], [ "12", "Xm_rep15", ""Xm_rep15"", ""45Xm"" ], [ "13", "Xp_rep1", ""Xp_rep1"", ""45Xp"" ], [ "14", "Xp_rep2", ""Xp_rep2"", ""45Xp"" ], [ "15", "Xp_rep3", ""Xp_rep3"", ""45Xp"" ], [ "16", "Xp_rep4", ""Xp_rep4"", ""45Xp"" ], [ "17", "Xp_rep7", ""Xp_rep7"", ""45Xp"" ], [ "18", "Xp_rep9", ""Xp_rep9"", ""45Xp"" ] ];
 var svgObjectNames   = [ "pca", "dens" ];
 
 var cssText = ["stroke-width:1; stroke-opacity:0.4",
