@@ -8,7 +8,7 @@
 ![](./images/header_adn.jpg)
 
 ```{r setup, include=FALSE, echo=FALSE, fig.width = 10, fig.height = 10, out.width = "400px", out.height="300px"}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, eval = TRUE, warning = FALSE, comment=NA)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, eval = TRUE, warning = FALSE, comment=NA)
 
 ```
 <br>
@@ -127,6 +127,7 @@ https://bioconductor.org/packages/release/data/annotation/html/hgu133plus2.db.ht
 # BiocManager::install("ggnewscale")
 # BiocManager::install("AnnotationDbi")
 # BiocManager::install("hgu133plus2.db")
+# BiocManager::install("org.Hs.eg.db")
 
 ```
   
@@ -247,9 +248,11 @@ cat("Comprobamos Clase rawData: ",class(rawData))
 #colnames(rawData)
 #knitr::kable(pData(rawData), booktabs = TRUE, caption = 'Tabla phenotipo de rawData GSE46687')
 #pData(rawData)
-
-muestras -> rownames(pData(rawData))
+my.targets@data$sample_id->rownames(pData(rawData))
 colnames(rawData) <-rownames(pData(rawData)) 
+
+#muestras -> rownames(pData(rawData))
+#colnames(rawData) <-rownames(pData(rawData)) 
 #head(pData(rawData))
 #rawData
 #colnames(rawData)
@@ -386,8 +389,8 @@ eset_rma <- rma(rawData)
 #knitr::kable(pData(eset_rma), booktabs = TRUE, caption = 'Tabla phenotipo de eset_rma GSE46687')
 #pData(eset_rma)
 
-muestras -> rownames(pData(eset_rma))
-colnames(eset_rma) <-rownames(pData(eset_rma)) 
+#muestras -> rownames(pData(eset_rma))
+#colnames(eset_rma) <-rownames(pData(eset_rma)) 
 #head(pData(eset_rma))
 #eset_rma
 #colnames(eset_rma)
@@ -620,14 +623,6 @@ library("hgu133plus2.db")
 annotation(eset_m17) <- "hgu133plus2.db"
 
 
-list_filtered <- nsFilter(eset_m17, require.entrez = TRUE, remove.dupEntrez = TRUE, var.filter=TRUE, var.func=IQR, var.cutoff=0.75,filterByQuantile=TRUE, feature.exclude = "^AFFX")
-eset_filtered <- list_filtered$eset
-print(list_filtered$filter.log)
-dim(exprs(eset_filtered))
-
-cat("Si aplicamos un filtro del 75% de genes, nos quedan ",dim(exprs(eset_filtered))[1]," probesets")
-
-
 list_filtered <- nsFilter(eset_m17, require.entrez = TRUE, remove.dupEntrez = TRUE, var.filter=TRUE, var.func=IQR, var.cutoff=0.99,filterByQuantile=TRUE, feature.exclude = "^AFFX")
 eset_filtered <- list_filtered$eset
 #print(list_filtered$filter.log)
@@ -642,12 +637,17 @@ eset_filtered <- list_filtered$eset
 
 cat("Si aplicamos un filtro del 95% de genes, nos quedan ",dim(exprs(eset_filtered))[1]," probesets")
 
+list_filtered <- nsFilter(eset_m17, require.entrez = TRUE, remove.dupEntrez = TRUE, var.filter=TRUE, var.func=IQR, var.cutoff=0.75,filterByQuantile=TRUE, feature.exclude = "^AFFX")
+eset_filtered <- list_filtered$eset
+print(list_filtered$filter.log)
+dim(exprs(eset_filtered))
 
+cat("Si aplicamos un filtro del 75% de genes, nos quedan ",dim(exprs(eset_filtered))[1]," probesets")
 ```
 
 <br>
 
-En nuestro caso nos quedaremos con un subset de probes correspondiente al **5%** de "genes" expresados. Pongo "genes" entrecomillados porque he estado usando este termino con abuso de lenguaje, ya que son tránscritos de RNAm que combinan distintos exones del mismo gen. Por lo tanto hemos eliminado provisionalmente el 95% de los probesets aparentemente sin valor en el estudio.
+En nuestro caso nos quedaremos con un subset de probes correspondiente al **25%** de "genes" expresados. Pongo "genes" entrecomillados porque he estado usando este termino con abuso de lenguaje, ya que son tránscritos de RNAm que combinan distintos exones del mismo gen. Por lo tanto hemos eliminado provisionalmente el 95% de los probesets aparentemente sin valor en el estudio.
 
 <br>
 <br>
@@ -678,10 +678,9 @@ save(eset_m17, eset_filtered, file="./results/normalized17.Data.Rda")
 
 #### **Matriz de contrastes**  
   
-En este apartado vamos a construir la matriz de contrastes. En nuestro caso queremos realizar tres comparaciones:
+En este apartado vamos a construir la matriz de contrastes. En nuestro caso vamos a estudiar dos comparaciones:
 
 - grupo Xp respecto grupo Xm
-- grupo Xp respecto grupo XX
 - grupo Xm respecto grupo XX
 
 <br>
@@ -695,7 +694,7 @@ designMat<- model.matrix(~0+karyotype, pData(eset_filtered))
 colnames(designMat) <- c("XX", "Xp", "Xm")
 print(designMat)
 
-cont.matrix <- makeContrasts(Xp_vs_Xm = Xp-Xm, Xp_vs_XX = Xp-XX, Xm_vs_XX = Xm-XX,levels=designMat)
+cont.matrix <- makeContrasts(Xp_vs_Xm = Xp-Xm, Xm_vs_XX = Xm-XX,levels=designMat)
 print(cont.matrix)
 ```
 
@@ -734,7 +733,7 @@ Al tratarse de un transcrito inactivo, me inclino a pensar que hay algun tipo de
 ```{r creando expressionset eliminando 224588_a}
 
 genes <- rownames(exprs(eset_filtered))
-pos <- grep('224588',genes) #localizao la posición del transcrito
+pos <- grep('224588',genes) #localizar la posición del transcrito
 pos
 genes[pos]
 exprs_f17 <- exprs(eset_filtered)[-pos,]
@@ -767,9 +766,9 @@ abline(v=c(-1,1))
 volcanoplot(fit.main, coef=2, highlight=4, names=rownames(fit.main), 
              main=paste("Differentially expressed genes", colnames(cont.matrix)[2], sep="\n"))
 abline(v=c(-1,1))
-volcanoplot(fit.main, coef=3, highlight=4, names=rownames(fit.main), 
-             main=paste("Differentially expressed genes", colnames(cont.matrix)[3], sep="\n"))
-abline(v=c(-1,1))
+#volcanoplot(fit.main, coef=3, highlight=4, names=rownames(fit.main), 
+#             main=paste("Differentially expressed genes", colnames(cont.matrix)[3], sep="\n"))
+#abline(v=c(-1,1))
 ```
 
 
@@ -782,8 +781,8 @@ sum.res.rows<-apply(abs(res),1,sum)
 res.selected<-res[sum.res.rows!=0,] 
 print(summary(res))
 
-vennDiagram (res.selected[,1:3], cex=0.9)
-title("Genes in common between the three comparisons\n Genes selected with FDR < 0.1 and logFC > 1")
+vennDiagram (res.selected[,1:2], cex=0.9)
+title("Genes in common between the two comparisons\n Genes selected with FDR < 0.1 and logFC > 1")
 
 ```
 
@@ -791,6 +790,7 @@ title("Genes in common between the three comparisons\n Genes selected with FDR <
 ```{r heatmap}
 
 probesInHeatmap <- rownames(res.selected)
+#HMdata <- exprs(eset_filtered17)[rownames(exprs(eset_filtered17)) %in% probesInHeatmap,]
 HMdata <- exprs(eset_filtered17)[rownames(exprs(eset_filtered17)) %in% probesInHeatmap,]
  
 geneSymbols <- select(hgu133plus2.db, rownames(HMdata), c("SYMBOL"))
@@ -828,11 +828,12 @@ heatmap.2(HMdata,
 top_Xp_Xm <- topTable (fit.main, number=nrow(fit.main), coef="Xp_vs_Xm", adjust="fdr") 
 head(top_Xp_Xm)
 
-top_Xp_XX <- topTable (fit.main, number=nrow(fit.main), coef="Xp_vs_XX", adjust="fdr")  
-head(top_Xp_XX)
+#top_Xp_XX <- topTable (fit.main, number=nrow(fit.main), coef="Xp_vs_XX", adjust="fdr")  
+#head(top_Xp_XX)
 
 top_Xm_XX <- topTable (fit.main, number=nrow(fit.main), coef="Xm_vs_XX", adjust="fdr") 
 head(top_Xm_XX)
+dim(top_Xp_Xm)
 ```
 
 
@@ -860,33 +861,37 @@ return(annotatedTopTab)
 topAnnotated_Xp_vs_Xm <- annotatedTopTable(top_Xp_Xm,
 anotPackage="hgu133plus2.db")
 
-topAnnotated_Xp_vs_XX <- annotatedTopTable(top_Xp_XX,
-anotPackage="hgu133plus2.db")
+#topAnnotated_Xp_vs_XX <- annotatedTopTable(top_Xp_XX,
+#anotPackage="hgu133plus2.db")
 
 topAnnotated_Xm_vs_XX <- annotatedTopTable(top_Xm_XX,
 anotPackage="hgu133plus2.db")
 
 write.csv(topAnnotated_Xp_vs_Xm, file="./results/topAnnotated_Xp_vs_Xm.csv")
-write.csv(topAnnotated_Xp_vs_XX, file="./results/topAnnotated_Xp_vs_XX.csv")
+#write.csv(topAnnotated_Xp_vs_XX, file="./results/topAnnotated_Xp_vs_XX.csv")
 write.csv(topAnnotated_Xm_vs_XX, file="./results/topAnnotated_Xm_vs_XX.csv")
 
 head(topAnnotated_Xp_vs_Xm,10)
+#head(topAnnotated_Xp_vs_XX,10)
+head(topAnnotated_Xm_vs_XX,10)
+
 class(topAnnotated_Xp_vs_Xm)
+dim(topAnnotated_Xp_vs_Xm)
 
 ```
 
-#```{r nueva lista de genes}
+```{r nueva lista de genes}
 
 # Nueva lista de genes
 listOfTables <- list(Xp_vs_Xm = top_Xp_Xm,
-                     Xp_vs_XX = top_Xp_XX,
+#                     Xp_vs_XX = top_Xp_XX,
                      Xm_vs_XX = top_Xm_XX)
 listOfSelected <- list()
 for (i in 1:length(listOfTables)){
 # select the toptable
 topTab <- listOfTables[[i]]
 # select the genes to be included in the analysis
-whichGenes<-topTab["adj.P.Val"]<0.15
+whichGenes<-topTab["adj.P.Val"]<0.30
 selectedIDs <- rownames(topTab)[whichGenes]
 # convert the ID to Entrez
  EntrezIDs<- select(hgu133plus2.db, selectedIDs, c("ENTREZID"))
@@ -898,35 +903,55 @@ selectedIDs <- rownames(topTab)[whichGenes]
 
 
 sapply(listOfSelected, length)
+listOfSelected[[1]]
+listOfSelected[[2]]
 
-library(org.Mm.eg.db)
-mapped_genes2GO <- mappedkeys(org.Mm.egGO)
-mapped_genes2KEGG <- mappedkeys(org.Mm.egPATH)
+library(org.Hs.eg.db)
+mapped_genes2GO <- mappedkeys(org.Hs.egGO)
+mapped_genes2KEGG <- mappedkeys(org.Hs.egPATH)
 mapped_genes <- union(mapped_genes2GO , mapped_genes2KEGG)
-#```
+length(mapped_genes)
+#mapped_genes <- as.character(as.integer(substring(mapped_genes,first = 5)))
+#head(mapped_genes,20)
+```
 
 
 
 
-#```{r estudio de genes}
+```{r estudio de genes}
 
 library(ReactomePA)
 library(ggnewscale)
+
 listOfData <- listOfSelected[1:2]
+#head(listOfData,10)
+names(listOfData)
+
+
 comparisonsNames <- names(listOfData)
+cat("Comparisons!!!")
+comparisonsNames
+
 universe <- mapped_genes
 for (i in 1:length(listOfData)){
 genesIn <- listOfData[[i]]
 comparison <- comparisonsNames[i]
 enrich.result <- enrichPathway(gene = genesIn,
-                                pvalueCutoff = 0.05,
+                                pvalueCutoff = 0.15,
                                 readable = T,
                                 pAdjustMethod = "BH",
+#                                qvalueCutoff = 0.2,
                                 organism = "human",
                                 universe = universe)
+cat("ENRICH ##################################")
+head(enrich.result)
 cat("##################################")
 cat("\nComparison: ", comparison,"\n")
 print(head(enrich.result))
+}
+
+
+
 #if (length(rownames(enrich.result@result)) != 0) {
 #write.csv(as.data.frame(enrich.result), 
 #            file =paste0("./results/","ReactomePA.Results.",comparison,".csv"), 
@@ -940,8 +965,37 @@ print(head(enrich.result))
 #        vertex.label.cex = 0.75))
 #dev.off()
 #}
-}
+```
+
+```{r grafico enrichement}
 
 cnetplot(enrich.result, categorySize = "geneNum", schowCategory = 15, 
         vertex.label.cex = 0.75)
 #```
+
+barplot(enrich.result, showCategory=8)
+
+dotplot(enrich.result, showCategory=15)
+
+#emapplot(enrich.result)
+
+```
+<br>
+
+### **CONCLUSIONES (Y PROBLEMAS)**
+  
+<br>
+
+#### **problemas que no me han permitido llegar a las conclusiones finales**
+
+
+Aunque he dedicado muchos muchos esfuerzos y muchas muchas horas, no he sido capaz  de resolver algunas dudas. Las cito en los siguientes puntos:
+
+- **Relación entre Xp y XX: **No acabo de entender que existan genes diferenciados entre Xm y XX , también entre Xm y Xp pero en cambio no existan diferencias entre Xp y XX. Biológicamente no me lo explico e incluso matemáticamente tampoco.
+
+- **Función enrichPathway: ** la función enrichPathway junto a la función Reactome me ha dado problemas indicando que **"No Gene can be mapped"** que entiendo que significa que no detecta genes o que no están bien identificados "Expected input gene ID: 7298,7965,129807.." No he sido capaz de solventarlo. No obstante, de las 3 comparaciones que he realizado, en el estudio me aparecen 2 tránscritos en la primera comparación, nada en la segunda (no había genes diferenciados) y nada en la tercera. He probado varios valores de cutoff de la función pero nada de nada.
+
+- **cnetplot: **Al no conseguir crear el mappeado anterior, no he conseguido tener el gráfico relacional entre "genes".
+  
+  
+Por lo tanto mis conclusiones las he ido citando en cada apartado pero no puedo llegar a las conclsuiones finales por falta de resultados.
